@@ -28,3 +28,27 @@ while suite != "ok":
     total_value +=n
     suite = input("Entrez une suite:")
 print(f"Total value : {total_value}")
+
+# Exercise : parity
+def parity(n):
+    if n % 2 == 0:
+        return "Nombre pair"
+    else:
+        return "Nombre impair"
+
+print(parity(567439)) # test 1
+print(parity(5674)) # test 2
+
+# Exercise : divisible
+def divisible(n):
+    liste_diviseur = []
+    for k in range(2,n):
+        if n % k == 0:
+            liste_diviseur.append(k)
+    if len(liste_diviseur) != 0:
+        print(f"Diviseurs propres sans répétition de {n} : {liste_diviseur}")
+    else:
+        print(f"Diviseurs propres sans répétition de {n} : aucun ! Il est premier")
+
+print(divisible(456)) # test 1
+print(divisible(13)) # test 2
