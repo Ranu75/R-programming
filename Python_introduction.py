@@ -52,3 +52,15 @@ def divisible(n):
 
 print(divisible(456)) # test 1
 print(divisible(13)) # test 2
+
+# Exercise : Palindrome 
+def palindrome(word:str):
+    if len(word) == 1 or len(word) == 0: 
+        return True
+    if word[0] == word[-1]:
+        return palindrome(word[1:-1])
+    return False
+
+print(palindrome("elle"))
+        
+    
