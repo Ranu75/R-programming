@@ -21,9 +21,9 @@ def matrice_nan(mat):
         nan = np.isnan(mat[:,i])
         if np.any(nan):
             if moyenne[i] > mediane[i]:
-                mat[nan,i] = moyenne[i] # missing value is the mean
+                mat[nan,i] = moyenne[i] # missing value is the mean of the column
             else:
-                mat[nan,i] = mediane[i] # missing value is the median
+                mat[nan,i] = mediane[i] # missing value is the median of the column
     
     return mat # return the matrice without missing value
 
