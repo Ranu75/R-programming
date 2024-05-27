@@ -1,0 +1,213 @@
+---
+title: "Diabete's detection"
+output: html_notebook
+---
+
+## Installer les packages
+
+```{r}
+# Installer les packages
+install.packages("rpart")
+install.packages("rpart.plot")
+install.packages("randomForest")
+install.packages("ROCR")
+install.packages("caret")
+```
+
+```{r}
+library(rpart)
+library(rpart.plot)
+library(randomForest)
+library(e1071)
+library(ROCR)
+library(caret)
+```
+
+## Importation et nettoyage
+
+```{r}
+data <- read.csv("diabetes.csv")
+head(data)
+```
+
+```{r}
+str(data) # informations sur les variables
+```
+
+```{r}
+data$Outcome <- as.factor(data$Outcome) # formattage de la variable 'Outcome'
+str(data) 
+```
+
+## Exploratoire des données
+
+```{r}
+summary(data) # résultats statistiques selon le type de variables
+```
+
+## Feature engineering
+
+Cette partie nécessite une connaissance métier que nous ne pouvons avoir en notre possession. Ce travail doit être réaliser à partir de discussion avec des professionnelles de santé tels que des médecins.
+
+## Modélisation
+
+### Arbre de décision
+
+```{r}
+# Définir un seed pour la reproductibilité
+set.seed(123)
+```
+
+```{r}
+# créer un indice pour partitionner les données (80% entraînement, 20% test)
+trainIndex <- createDataPartition(data$Outcome, p=0.8, list = FALSE)
+```
+
+```{r}
+# Diviser les données en ensembles d'entraînement et de test
+dataTrain <- data[trainIndex, ]
+dataTest <- data[-trainIndex, ]
+
+# Afficher les dimensions des ensembles d'entraînement et de test
+cat("Dimensions de l'ensemble d'entraînement : ", dim(dataTrain), "\n")
+cat("Dimensions de l'ensemble de test : ", dim(dataTest), "\n")
+```
+
+```{r}
+# Construire l'arbre de décision
+treeModel <- rpart(Outcome ~ ., data = dataTrain, method = "class")
+summary(treeModel) # afficher le résumé du modèle
+```
+
+```{r}
+# Visualiser l'arbre de décision
+rpart.plot(treeModel, main = "Arbre de Décision - Modèle de Diabète")
+```
+
+```{r}
+# Étudier la complexité de l'arbre
+printcp(treeModel)
+```
+
+```{r}
+# Tracer le graphique du paramètre de complexité de l'arbre
+plotcp(treeModel)
+```
+
+```{r}
+# Choisir le paramètre de complexité optimal (celui avec la plus petite erreur relative)
+optimalCp <- treeModel$cptable[which.min(treeModel$cptable[, "xerror"]), "CP"]
+
+# Élaguer l'arbre en utilisant le paramètre de complexité optimal
+prunedTreeModel <- prune(treeModel, cp = optimalCp)
+```
+
+```{r}
+# Visualiser l'abre élagué
+rpart.plot(prunedTreeModel, main = "Arbre de Décision Élagué - Modèle de Diabète")
+```
+
+```{r}
+# Réaliser des prédictions probabilistes sur l'ensemble de test avec l'arbre élagué
+probPredictions <- predict(prunedTreeModel, dataTest, type = "prob")[,2]
+```
+
+```{r}
+# Utiliser ROCR pour tracer la courbe ROC
+pred <- prediction(probPredictions, dataTest$Outcome)
+perf <- performance(pred, measure = "tpr", x.measure = "fpr")
+
+# Tracer la courbe ROC
+plot(perf, main = "Courbe ROC - Arbre de Décision Élagué", col = "blue", lwd = 2)
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+# Calculer et afficher l'AUC
+auc <- performance(pred, measure = "auc")
+aucValue <- auc@y.values[[1]]
+cat("AUC :", aucValue, "\n")
+```
+
+## Random Forest
+
+```{r}
+# Construire un randomForest
+rfModel <- randomForest(Outcome ~ ., data = dataTrain, importance = TRUE)
+```
+
+```{r}
+print(rfModel) 
+```
+
+```{r}
+# Importance des variables
+importance(rfModel)
+varImpPlot(rfModel)
+```
+
+#### Optimisation
+
+```{r}
+# initialisation d'un vecteur pour stocker les valeurs OOB (Out-Of-Bag)
+valeurs_oob <- vector(length = 8)
+
+# Boucle pour créer des modèles avec différentes valeurs de mtry (nb de variables considérées à chaque étape)
+for (i in 1:8){
+  # Créer un modèle de forêt aléatoire avec mtry = i
+  modele_temp <- randomForest(Outcome ~ ., data = dataTrain, mtry = i, ntree = 500)
+  
+  # Stocker l'erreur OOB du modèle
+  valeurs_oob[i] <- modele_temp$err.rate[nrow(modele_temp$err.rate), 1]
+  
+}
+
+# Afficher les valeurs OOB
+print(valeurs_oob)
+
+```
+
+```{r}
+# Trouver la valeur minimale de l'erreur OOB
+erreur_minimale <- min(valeurs_oob)
+
+# Afficher l'erreur minimale
+print(erreur_minimale)
+```
+
+```{r}
+# Trouver la valeur optimale pour mtry (celle qui correspond à l'erreur minimale)
+valeur_optimale_mtry <- which(valeurs_oob == erreur_minimale)
+
+# Afficher la valeur optimale de mtry
+print(valeur_optimale_mtry)
+
+```
+
+```{r}
+# Créer un modèle final en utilisant la meilleure valeur de mtry et en calculant les proximités
+modele_final <- randomForest(Outcome ~ .,
+                             data = dataTrain,
+                             ntree = 500,
+                             proximity = TRUE,
+                             mtry = valeur_optimale_mtry)
+```
+
+```{r}
+print(modele_final)
+```
+
+```{r}
+# Faire des prédictions sur l'ensemble de test
+predictions <- predict(modele_final, dataTest)
+```
+
+```{r}
+# Calculer et afficher la matrice de confusion
+confMatrix <- confusionMatrix(predictions, dataTest$Outcome)
+print(confMatrix)
+```
+
+```{r}
+# Faire des prédictions probabilistes pour le calcul de l'AuC
+probPredictionsTest <- predict(modele_final, dataTest, type = "prob")[,2]
+probPredictionsTrain <- predict(modele_final, dataTrain, type = "prob")[,2]
+```
