@@ -18,7 +18,8 @@ Here you have some tools to manage your data. These tools help you to deal with 
 
 ## Visualization
 
-Here you have some packages which help you to make beautiful plot. 
+Here you have some packages which help you to make beautiful plot (graph, map, etc...)
 
 ## Advanced Statistics Analysis
 
+This section hasn't been written yet. I will start when previous sections will be finished. 
