@@ -16,10 +16,15 @@ Here you have some tools to manage your data. These tools help you to deal with 
 
 ## Statistics Analysis
 
+Here you have different types of analysis such as bivariate or univariate analysis. In addition, you can have examples of the use of linear or logistic regression. 
+
 ## Visualization
 
-Here you have some packages which help you to make beautiful plot (graph, map, etc...)
+Here you have some packages which help you to make beautiful plot (graph, map, etc...). This section contains three R files :
+1. **map** : example of map plotting
+2. **Linkert** : to plot the Linkert table
+3. **ggplot2** : to enumerate all *ggplot2* function
 
 ## Advanced Statistics Analysis
 
-This section hasn't been written yet. I will start when previous sections will be finished. 
+In this section, only **RandomForest** is presented. It is one of the famous ML model which is used to realize prediction. I will complete when previous sections will be finished. 
