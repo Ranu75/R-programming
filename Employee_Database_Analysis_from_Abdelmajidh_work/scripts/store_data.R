@@ -1,3 +1,5 @@
+log_info("Convertir les données de fichier csv dans la bdd")
+
 # Sauvegarder les données dans une base de données SQLite 
 save_to_sqlite = function(data_list, db_path){
   # Connexion d'une base de données
@@ -11,17 +13,15 @@ save_to_sqlite = function(data_list, db_path){
   dbDisconnect(con)
 }
 
+log_info("Lire les données de fichier csv dans la bdd")
+
 # Lire les données dans une base de données SQLite
-read_from_sqlite = function(db_path){
+read_from_sqlite <- function(db_path, table_name) {
   # Connexion d'une base de données
-  con = dbConnect(SQLite(), db_path)
-  list_data = c()
-  for (data in db_path){
-    # Lecture des tables
-    df = dbReadTable(con, data)
-    list_data = c(list_data, df)
-  }
-  # Déconnecter de la base de données
+  con <- dbConnect(SQLite(), db_path)
+  # Lecture de la table
+  data <- dbReadTable(con, table_name)
   dbDisconnect(con)
-  return(list_data)
+  
+  return(data)
 }
