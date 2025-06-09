@@ -4,3 +4,5 @@ neuralnet
 h2o
 dplyr
 tidyverse
+tensorflow
+keras

@@ -28,3 +28,8 @@ Here you have some packages which help you to make beautiful plot (graph, map, e
 ## Advanced Statistics Analysis
 
 In this section, only **RandomForest** is presented. It is one of the famous ML model which is used to realize prediction. I will complete when previous sections will be finished. 
+
+## Deep Learning
+
+This part focus on neural network process. We explore many software packages that offer neural net implementations that apply directly. 
+
